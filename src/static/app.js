@@ -472,6 +472,88 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
+  // Function to create share buttons for an activity
+  function createShareButtons(activityName, details) {
+    const shareUrl = window.location.origin + window.location.pathname;
+    const shareText = `Check out ${activityName} at Mergington High School! ${details.description}`;
+    const formattedSchedule = formatSchedule(details);
+    const fullShareText = `${shareText}\nSchedule: ${formattedSchedule}`;
+    
+    let shareButtonsHtml = '<div class="share-buttons"><span class="share-label">Share:</span>';
+    
+    // Check if Web Share API is available (primarily for mobile)
+    if (navigator.share) {
+      shareButtonsHtml += `
+        <button class="share-button native tooltip" data-share-type="native" data-activity-name="${activityName}">
+          🔗
+          <span class="tooltip-text">Share this activity</span>
+        </button>
+      `;
+    }
+    
+    // Facebook share button
+    const facebookUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}&quote=${encodeURIComponent(fullShareText)}`;
+    shareButtonsHtml += `
+      <button class="share-button facebook tooltip" data-share-url="${facebookUrl}" data-share-type="facebook">
+        f
+        <span class="tooltip-text">Share on Facebook</span>
+      </button>
+    `;
+    
+    // Twitter/X share button
+    const twitterUrl = `https://x.com/intent/tweet?text=${encodeURIComponent(fullShareText)}&url=${encodeURIComponent(shareUrl)}`;
+    shareButtonsHtml += `
+      <button class="share-button twitter tooltip" data-share-url="${twitterUrl}" data-share-type="twitter">
+        𝕏
+        <span class="tooltip-text">Share on Twitter/X</span>
+      </button>
+    `;
+    
+    // Email share button
+    const emailSubject = `Mergington High School Activity: ${activityName}`;
+    const emailBody = `${fullShareText}\n\nLearn more at: ${shareUrl}`;
+    const emailUrl = `mailto:?subject=${encodeURIComponent(emailSubject)}&body=${encodeURIComponent(emailBody)}`;
+    shareButtonsHtml += `
+      <button class="share-button email tooltip" data-share-url="${emailUrl}" data-share-type="email">
+        ✉
+        <span class="tooltip-text">Share via Email</span>
+      </button>
+    `;
+    
+    shareButtonsHtml += '</div>';
+    return shareButtonsHtml;
+  }
+
+  // Handle share button clicks
+  function handleShareClick(event) {
+    const button = event.currentTarget;
+    const shareType = button.dataset.shareType;
+    const shareUrl = button.dataset.shareUrl;
+    
+    if (shareType === 'native') {
+      // Use Web Share API
+      const activityName = button.dataset.activityName;
+      const activity = allActivities[activityName];
+      if (activity) {
+        const formattedSchedule = formatSchedule(activity);
+        const cleanUrl = window.location.origin + window.location.pathname;
+        navigator.share({
+          title: `Mergington High School - ${activityName}`,
+          text: `${activity.description}\nSchedule: ${formattedSchedule}`,
+          url: cleanUrl
+        }).catch(err => {
+          console.log('Error sharing:', err);
+        });
+      }
+    } else if (shareType === 'email') {
+      // Open email client
+      window.location.href = shareUrl;
+    } else {
+      // Open in new window for social media
+      window.open(shareUrl, '_blank', 'width=600,height=400');
+    }
+  }
+
   // Function to render a single activity card
   function renderActivityCard(name, details) {
     const activityCard = document.createElement("div");
@@ -528,6 +610,7 @@ document.addEventListener("DOMContentLoaded", () => {
         <span class="tooltip-text">Regular meetings at this time throughout the semester</span>
       </p>
       ${capacityIndicator}
+      ${createShareButtons(name, details)}
       <div class="participants-list">
         <h5>Current Participants:</h5>
         <ul>
@@ -570,6 +653,12 @@ document.addEventListener("DOMContentLoaded", () => {
         }
       </div>
     `;
+
+    // Add click handlers for share buttons
+    const shareButtons = activityCard.querySelectorAll(".share-button");
+    shareButtons.forEach((button) => {
+      button.addEventListener("click", handleShareClick);
+    });
 
     // Add click handlers for delete buttons
     const deleteButtons = activityCard.querySelectorAll(".delete-participant");
