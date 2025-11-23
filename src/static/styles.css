@@ -723,5 +723,6 @@ footer {
 
 /* Adjust user controls position when dark mode toggle is present */
 body #user-controls {
+  /* Offset by dark mode toggle button width (~95px) + spacing */
   right: 110px;
 }

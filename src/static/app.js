@@ -33,7 +33,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (isDarkMode) {
       localStorage.setItem("darkMode", "enabled");
     } else {
-      localStorage.setItem("darkMode", "disabled");
+      localStorage.removeItem("darkMode");
     }
   }
 
