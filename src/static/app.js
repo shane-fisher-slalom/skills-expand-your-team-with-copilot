@@ -500,8 +500,8 @@ document.addEventListener("DOMContentLoaded", () => {
       </button>
     `;
     
-    // Twitter share button
-    const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(fullShareText)}&url=${encodeURIComponent(shareUrl)}`;
+    // Twitter/X share button
+    const twitterUrl = `https://x.com/intent/tweet?text=${encodeURIComponent(fullShareText)}&url=${encodeURIComponent(shareUrl)}`;
     shareButtonsHtml += `
       <button class="share-button twitter tooltip" data-share-url="${twitterUrl}" data-share-type="twitter">
         𝕏
@@ -536,10 +536,11 @@ document.addEventListener("DOMContentLoaded", () => {
       const activity = allActivities[activityName];
       if (activity) {
         const formattedSchedule = formatSchedule(activity);
+        const cleanUrl = window.location.origin + window.location.pathname;
         navigator.share({
           title: `Mergington High School - ${activityName}`,
           text: `${activity.description}\nSchedule: ${formattedSchedule}`,
-          url: window.location.href
+          url: cleanUrl
         }).catch(err => {
           console.log('Error sharing:', err);
         });
